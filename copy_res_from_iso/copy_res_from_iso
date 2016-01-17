@@ -1,0 +1,31 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*- 
+import os
+import sys
+
+def copy_lorax_pkgs():
+    src = os.path.join('/', 'mnt', 'cdrom', 'Packages', '')
+    dst = os.path.join('./', 'lorax', 'Packages', 'lorax')
+    #os.system("/usr/bin/rm -rf ./lorax")
+    os.system("mkdir -p " + dst)
+    with open('lorax.pkgs.txt', 'r') as f:
+        for line in f:
+            print "Now copy " + src + line.strip("\r\n") + "*.rpm to " + dst + " ..."
+            os.system("cp -r " + src + line.strip("\r\n") + "*.rpm " + dst)
+    
+def gen_lorax_repo():
+    copy_lorax_pkgs()
+    os.system("cd ./lorax && createrepo . && cd -")
+            
+def copy_core_pkgs():
+    src = os.path.join('/', 'mnt', 'cdrom', 'Packages', '')
+    dst = os.path.join('./', 'mini', 'Packages', 'mini')
+    os.system("/usr/bin/rm -rf ./mini && mkdir -p " + dst)
+    with open('minimal.pkgs.txt', 'r') as f:
+        for line in f:
+            print "Now copy " + src + line.strip("\r\n") + "*.rpm to " + dst + " ..."
+            os.system("cp -r " + src + line.strip("\r\n") + "*.rpm " + dst)
+
+if __name__ == "__main__":
+    gen_lorax_repo()
+    copy_core_pkgs()

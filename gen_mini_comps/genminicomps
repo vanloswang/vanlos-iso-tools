@@ -1,0 +1,24 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*- 
+
+import libcomps
+
+def gen_mini_comps():
+    comps = libcomps.Comps()
+    comps.fromxml_f("comps-Server.x86_64.xml")
+    #print (comps.xml_str())
+    core_group = comps.groups["core"];
+    #debugging_group = comps.groups["debugging"];
+    minimal_environments = comps.environments["minimal"]
+    langpacks = comps.langpacks;
+    
+    minicomps = libcomps.Comps()
+    minicomps.groups.append(core_group)
+    #minicomps.groups.append(debugging_group)
+    minicomps.environments.append(minimal_environments)
+    minicomps.langpacks = langpacks
+    #print (minicomps.xml_str())
+    minicomps.xml_f("mini_comps.xml")
+    
+if __name__ == "__main__":
+    gen_mini_comps()

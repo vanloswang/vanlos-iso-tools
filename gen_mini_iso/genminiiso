@@ -1,0 +1,60 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*- 
+
+import os
+import sys
+import libcomps
+
+def getcwd():
+     path = sys.path[0]
+     if os.path.isdir(path):
+         return path
+     elif os.path.isfile(path):
+         return os.path.dirname(path)
+
+def cleanup():
+    os.system("/usr/bin/rm -rf ./VanlOS")
+
+def copy_res():
+    os.system("mkdir -p ./VanlOS/repo")
+    os.system("/usr/bin/cp -rf ../copyminresfromiso/mini/Packages ./VanlOS/repo/")
+    os.system("/usr/bin/cp -rf ../genminicomps/mini_comps.xml ./VanlOS/repo/")
+    
+def create_repo(path):
+    comps = os.path.join(path, "VanlOS", "repo", "mini_comps.xml")
+    return os.system("cd VanlOS/repo && createrepo -g " + comps + " . && cd -")
+    
+def gen_base_iso(path):
+    repo = os.path.join(path, "..", "copyminresfromiso", "lorax")
+    output = os.path.join(path, "VanlOS", "BaseISO")
+    cmd = "setenforce 0 && cd VanlOS && lorax -p VanlOS -v 7 -r VanlOS -s " + repo + " " + output + " && setenforce 1 && cd -"
+    print cmd
+    return os.system(cmd)
+
+def merge_res(path):
+    cmd = "/usr/bin/cp -rf ./VanlOS/repo/* ./VanlOS/BaseISO/"
+    os.system(cmd)
+
+def gen_mini_iso(path):
+    iso = os.path.join(path, "vanlos-installer.iso")
+    merge_res(path)
+    cmd = "mkisofs -U -A \"VanlOS x86_64\" -V \"VanlOS x86_64\" "
+    cmd += "-volset \"VanlOS x86_64\" -J -joliet-long -r -v -T -x ./lost+found "
+    cmd += "-o " + iso + " "
+    cmd += "-b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 1024 " 
+    cmd += "-boot-info-table -eltorito-alt-boot -e images/efiboot.img -no-emul-boot -input-charset utf-8 ."
+    print cmd
+    return os.system("cd VanlOS/BaseISO && " + cmd + " && cd -")
+    
+if __name__ == "__main__":
+    cwd = getcwd()
+    cleanup()
+    copy_res()
+    create_repo(cwd)
+    if (0 != gen_base_iso(cwd)):
+        print "Generate base iso resources fail."
+    else:
+        if (0 != gen_mini_iso(cwd)):
+            print "Generate mini iso fail."
+        else:
+            print "Generate base iso resources success."
